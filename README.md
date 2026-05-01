@@ -1,6 +1,6 @@
 # CS Project Specilization - Raspberry Pi Local SoftAP Setup
 
-We got inspired to make this project because we realised how many people lose their life or get their life dramaticly changed for the worse because of PFM -1 anti personal landmines.
+We got inspired to make this project because we realised how many people lose their life or get their life dramaticly changed for the worse because of PFM -1 anti personal landmines. We want to make a system that can help detect that kind of landmine. Based on what model that is being used this system has potential to be used for more then  just that landmine.
 
 ## 0 - Before you begin
 Flash the sd card with raspberry pi image matching the model you are going to use
