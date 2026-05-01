@@ -16,8 +16,13 @@ For the raspberry pi to be able to turn on soft AP mode, you need two packages:
 hostapd to create the Wi‑Fi AP
 dnsmasq to hand out local IP addresses
 Run these commands to download the needed packages:
+```
 sudo apt install hostapd dnsmasq
+```
+hostapd is be default masked, that just means it can run so we need to unmask it, you can always undo it 
+```
 sudo unmask hostapd
+```
 We need to configure the configs of the packages before we can use them. For that to be possible we stop them so they are not running
 sudo systemctl stop hostapd dnsmasq
 
