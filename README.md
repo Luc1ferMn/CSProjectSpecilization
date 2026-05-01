@@ -3,14 +3,16 @@
 We got inspired to make this project because we realised how many people lose their life or get their life dramaticly changed for the worse because of PFM -1 anti personal landmines.
 
 ## 0 - Before you begin
-Flash the sd card with raspberry pi image
+Flash the sd card with raspberry pi image matching the model you are going to use
 
-Mac address for badboy ESP - 32
-
+# how to connect to it easly 
+...
 ### Before you can use the raspberry pi remember to run
+Update the system with the follwing commands or if you are in desktop mode you can use the update program in the topbar
+```
 sudo apt update
 sudo apt upgrade
-
+```
 ## 01 - Install required packages
 For the raspberry pi to be able to turn on soft AP mode, you need two packages:
 hostapd to create the Wi‑Fi AP
