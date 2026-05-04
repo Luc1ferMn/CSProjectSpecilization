@@ -23,9 +23,11 @@ sudo apt install hostapd dnsmasq
 ```
 hostapd is be default masked, that just means it can run so we need to unmask it, you can always undo it 
 ```
-sudo unmask hostapd
+sudo systemctl unmask hostapd
 ```
+
 We need to configure the configs of the packages before we can use them. For that to be possible we stop them so they are not running
+
 sudo systemctl stop hostapd dnsmasq
 
 ## 02 - Assign a static IP to wlan0
