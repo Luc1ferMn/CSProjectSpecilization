@@ -1,0 +1,36 @@
+#Setup Guide for running CLI using swapfile for added memory space
+# Ollama + Qwen 2.5:0.5b on Raspberry Pi 3 (USB Swap)
+
+## 1. Mount your USB drive
+sudo mkdir /mnt/<YOUR_USB_NAME>
+sudo mount /dev/sda1 /mnt/<YOUR_USB_NAME>
+
+Check it worked:
+df -h | grep sda
+
+## 2. Create a swapfile on the USB
+
+sudo fallocate -l 4G /mnt/<YOUR_USB_NAME>/swapfile
+sudo chmod 600 /mnt/<YOUR_USB_NAME>/swapfile
+sudo mkswap /mnt/<YOUR_USB_NAME>/swapfile
+sudo swapon /mnt/<YOUR_USB_NAME>/swapfile
+
+Verify swap is active:
+
+free -h
+
+## 3. Make swap persistent on reboot
+
+echo '/mnt/<YOUR_USB_NAME>/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+
+## 4. Install Ollama
+curl -fsSL https://ollama.com/install.sh | sh
+
+## 5. Pull and run Qwen 2.5:0.5b
+ollama pull qwen2.5:0.5b
+ollama run qwen2.5:0.5b
+
+## Things to know
+- **USB speed matters** — use USB 3.0 if possible. The Pi 3 only has USB 2.0, so expect slow responses.
+- **SD card swap is worse** — USB is still faster and safer for the SD card's lifespan.
+- **First run is slow** — model loading with swap offloading can take 1-2 minutes, that's normal.
