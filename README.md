@@ -60,7 +60,13 @@ Then add the following configuration, remember to have the same base address as 
 # This gives other devices an IP but does not forward the internet
 interface=wlan0
 
-dhcp-range=192.168.4.10,192.168.4.10,255.255.255.0/24h
+bind-dynamic
+
+dhcp-range=192.168.4.10,192.168.4.20,12h
+
+dhcp-option=3,192.168.4.1
+dhcp-option=6,192.168.4.1
+
 ```
 
 The two numbers you pick here 192.168.50.10 and 192.168.50.10
