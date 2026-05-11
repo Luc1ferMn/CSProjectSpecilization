@@ -133,3 +133,8 @@ sudo systemctl restart hostapd
 sudo systemctl restart dnsmasq
 ```
 Now you should be able to find you network and be able to connect to it and ssh to the raspberry again.
+When you are sure you can access the Raspberry without internet you can run. This will unable the device to connect to any other wi-fi. You can always unmask it if you need it later. 
+```
+sudo systemctl mask wpa_supplicant
+```
+Now the Raspberry AP setup is done and you are ready to setup the ESP-32.
