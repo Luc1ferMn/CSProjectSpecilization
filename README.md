@@ -60,7 +60,13 @@ Then add the following configuration, remember to have the same base address as 
 # This gives other devices an IP but does not forward the internet
 interface=wlan0
 
-dhcp-range=192.168.4.10,192.168.4.10,255.255.255.0/24h
+bind-dynamic
+
+dhcp-range=192.168.4.10,192.168.4.20,12h
+
+dhcp-option=3,192.168.4.1
+dhcp-option=6,192.168.4.1
+
 ```
 
 The two numbers you pick here 192.168.50.10 and 192.168.50.10
@@ -127,3 +133,8 @@ sudo systemctl restart hostapd
 sudo systemctl restart dnsmasq
 ```
 Now you should be able to find you network and be able to connect to it and ssh to the raspberry again.
+When you are sure you can access the Raspberry without internet you can run. This will unable the device to connect to any other wi-fi. You can always unmask it if you need it later. 
+```
+sudo systemctl mask wpa_supplicant
+```
+Now the Raspberry AP setup is done and you are ready to setup the ESP-32.
