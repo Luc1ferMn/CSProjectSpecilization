@@ -53,3 +53,25 @@ def main():
         if data is None:
             time.sleep(0.01)
             continue
+
+        arr = np.frombuffer(data, dtype=np.uint8)
+        frame = cv2.imdecode(arr, cv2.IMREAD_COLOR)
+        if frame is None:
+            continue
+
+        results = model(frame, conf=CONFIDENCE, imgsz=320, verbose=False)
+        annotated = results[0].plot()
+
+        now = time.time()
+        fps = 0.9 * fps + 0.1 * (1.0 / max(now - last, 1e-6))
+        last = now
+        cv2.putText(annotated, f"{fps:5.1f} FPS | {len(results[0].boxes)} det", (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+
+        cv2.imshow(WINDOW_NAME, annotated)
+        if cv2.waitKey(1) & 0xFF == ord("q"):
+            break
+
+    cv2.destroyAllWindows()
+
+if __name__ == "__main__":
+    main()
