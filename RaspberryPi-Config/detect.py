@@ -8,7 +8,7 @@ from ultralytics import YOLO
 
 CAM_IP      = "192.168.50.18"
 WS_URL      = f"ws://{CAM_IP}:81/ws"
-MODEL_PATH  = "/home/badboii/pfm1.pt"
+MODEL_PATH  = "/home/badboii/yolo11pfm1_320.onnx"  # ONNX is faster than .pt on Pi CPU
 CONFIDENCE  = 0.5
 WINDOW_NAME = "PFM-1 Detection"
 
