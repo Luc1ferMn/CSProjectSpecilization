@@ -55,7 +55,7 @@ def main():
     model = YOLO(MODEL_PATH)
 
     cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_NORMAL)
-    cv2.resizeWindow(WINDOW_NAME, 960, 720)
+    cv2.resizeWindow(WINDOW_NAME, 360, 360)
 
     threading.Thread(target=reader, daemon=True).start()
 
