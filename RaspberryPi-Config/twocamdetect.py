@@ -6,10 +6,16 @@ import websocket
 from collections import deque
 from ultralytics import YOLO
 
+# you can use 160 320 or 620 for the image size
+modelVersion = "yolov11"
+image_size = 320
 CAM_IPS     = ["192.168.50.18", "192.168.50.11"]  # ESP32-CAM 1 and 2
-MODEL_PATH  = "/home/badboii/yolo11pfm1_320.onnx"  # ONNX is faster than .pt on Pi CPU
-CONFIDENCE  = 0.5
+MODEL_PATH  = f"/home/badboii/MineModels/{modelVersion}/{modelVersion}pfm1_{image_size}.onnx"
+CONFIDENCE  = 0.30
 WINDOW_NAME = "PFM-1 Detection"
+
+
+
 
 latest_frame = [None]   # single-slot buffer; reader thread always overwrites
 lock = threading.Lock()
@@ -38,7 +44,7 @@ def reader():
                 ws = websocket.WebSocket()
                 ws.connect(f"ws://{active_ip}:81/ws", timeout=5)
                 print(f"Reconnected to ws://{active_ip}:81/ws")
-
+		
             while True:
                 data = ws.recv()
                 if not data or isinstance(data, str):
@@ -46,16 +52,15 @@ def reader():
                 with lock:
                     latest_frame[0] = data
         except Exception as e:
-            print(f"WS error: {e} — reconnecting in 2s")
+            print(f"Ws error: {e} - reconnecting in 2s" )
             active_ip = None
             time.sleep(2)
-
 
 def main():
     model = YOLO(MODEL_PATH)
 
     cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_NORMAL)
-    cv2.resizeWindow(WINDOW_NAME, 360, 360)
+    cv2.resizeWindow(WINDOW_NAME, 960, 720)
 
     threading.Thread(target=reader, daemon=True).start()
 
@@ -75,7 +80,7 @@ def main():
         if frame is None:
             continue
 
-        results = model(frame, conf=CONFIDENCE, imgsz=320, verbose=False)
+        results = model(frame, conf=CONFIDENCE, imgsz=image_size, verbose=False)
         annotated = results[0].plot()
 
         now = time.time()
@@ -91,3 +96,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
+
