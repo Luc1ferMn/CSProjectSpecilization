@@ -6,9 +6,11 @@ import websocket
 from collections import deque
 from ultralytics import YOLO
 
+modelVersion = "yolov11"
+image_size = 320
 CAM_IP      = "192.168.50.18"
 WS_URL      = f"ws://{CAM_IP}:81/ws"
-MODEL_PATH  = "/home/badboii/yolo11pfm1_320.onnx"  # ONNX is faster than .pt on Pi CPU
+MODEL_PATH  = f"/home/badboii/MineModels/{modelVersion}/{modelVersion}pfm1_{image_size}.onnx"
 CONFIDENCE  = 0.5
 WINDOW_NAME = "PFM-1 Detection"
 
@@ -59,7 +61,7 @@ def main():
         if frame is None:
             continue
 
-        results = model(frame, conf=CONFIDENCE, imgsz=320, verbose=False)
+        results = model(frame, conf=CONFIDENCE, imgsz=image_size, verbose=False)
         annotated = results[0].plot()
 
         now = time.time()
