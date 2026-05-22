@@ -3,75 +3,102 @@ import numpy as np
 import time
 import threading
 import websocket
-from collections import deque
 from ultralytics import YOLO
-# you can use 160 320 or 620 for the image size
+
 modelVersion = "yolov11"
 image_size = 320
-CAM_IP      = "192.168.50.18"
-WS_URL      = f"ws://{CAM_IP}:81/ws"
-MODEL_PATH  = f"/home/badboii/MineModels/{modelVersion}/{modelVersion}pfm1_{image_size}.onnx"
-CONFIDENCE  = 0.30
-WINDOW_NAME = "PFM-1 Detection"
 
-latest_frame = [None]   # single-slot buffer; reader thread always overwrites
-lock         = threading.Lock()
+# To kameraer
+CAM_IPS = ["192.168.50.18", "192.168.50.19"]  # Eller fra command line
+CONFIDENCE = 0.30
+WINDOW_NAME = "PFM-1 Detection - Dual"
+
+latest_frames = [None, None]  # [cam0, cam1]
+lock = threading.Lock()
+connected = [False, False]    # Track forbindelsesstatus
 
 
-def reader():
-    """Continuously read JPEGs from WS into the single-slot buffer.
-    Older frames are dropped automatically because we only keep [-1]."""
+def reader(cam_idx):
+    """Read fra kamera ved indeks cam_idx"""
+    ws_url = f"ws://{CAM_IPS[cam_idx]}:81/ws"
     while True:
         try:
             ws = websocket.WebSocket()
-            ws.connect(WS_URL, timeout=5)
-            print(f"Connected to {WS_URL}")
+            ws.connect(ws_url, timeout=5)
+            print(f"[CAM{cam_idx}] Connected to {ws_url}")
+            connected[cam_idx] = True
+            
             while True:
                 data = ws.recv()
                 if not data or isinstance(data, str):
                     continue
                 with lock:
-                    latest_frame[0] = data
+                    latest_frames[cam_idx] = data
+                    
         except Exception as e:
-            print(f"WS error: {e} â€” reconnecting in 2s")
+            print(f"[CAM{cam_idx}] WS error: {e} – reconnecting in 2s")
+            connected[cam_idx] = False
             time.sleep(2)
 
 
 def main():
-    model = YOLO(MODEL_PATH, task="detect")
+    model = YOLO(f"/home/badboii/MineModels/{modelVersion}/{modelVersion}pfm1_{image_size}.onnx", task="detect")
+
+    # Start reader threads for begge kameraer
+    for i in range(2):
+        threading.Thread(target=reader, args=(i,), daemon=True).start()
+
+    # Vent til begge er forbundne
+    print("Venter på forbindelse til begge kameraer...")
+    while not (connected[0] and connected[1]):
+        time.sleep(0.5)
+    print("Begge kameraer forbundne!")
 
     cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_NORMAL)
-    cv2.resizeWindow(WINDOW_NAME, 320, 320)
-
-
-    threading.Thread(target=reader, daemon=True).start()
+    cv2.resizeWindow(WINDOW_NAME, 640, 320)
 
     last, fps = time.time(), 0.0
 
     while True:
         with lock:
-            data = latest_frame[0]
-            latest_frame[0] = None    # consume
+            data0 = latest_frames[0]
+            data1 = latest_frames[1]
+            latest_frames[0] = None
+            latest_frames[1] = None
 
-        if data is None:
+        if data0 is None or data1 is None:
             time.sleep(0.01)
             continue
 
-        arr   = np.frombuffer(data, dtype=np.uint8)
-        frame = cv2.imdecode(arr, cv2.IMREAD_COLOR)
-        if frame is None:
+        # Dekod begge frames
+        arr0 = np.frombuffer(data0, dtype=np.uint8)
+        frame0 = cv2.imdecode(arr0, cv2.IMREAD_COLOR)
+        
+        arr1 = np.frombuffer(data1, dtype=np.uint8)
+        frame1 = cv2.imdecode(arr1, cv2.IMREAD_COLOR)
+
+        if frame0 is None or frame1 is None:
             continue
 
-        results   = model(frame, conf=CONFIDENCE, imgsz=image_size,  verbose=False)
-        annotated = results[0].plot()
+        # Run YOLO på begge
+        results0 = model(frame0, conf=CONFIDENCE, imgsz=image_size, verbose=False)
+        annotated0 = results0[0].plot()
+        
+        results1 = model(frame1, conf=CONFIDENCE, imgsz=image_size, verbose=False)
+        annotated1 = results1[0].plot()
 
-        now  = time.time()
-        fps  = 0.9 * fps + 0.1 * (1.0 / max(now - last, 1e-6))
+        # Kombiner side by side
+        combined = np.hstack([annotated0, annotated1])
+
+        # FPS + info
+        now = time.time()
+        fps = 0.9 * fps + 0.1 * (1.0 / max(now - last, 1e-6))
         last = now
-        cv2.putText(annotated, f"{fps:5.1f} FPS  |  {len(results[0].boxes)} Objects",
+        
+        cv2.putText(combined, f"CAM0: {len(results0[0].boxes)} | CAM1: {len(results1[0].boxes)} | FPS: {fps:5.1f}",
                     (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
 
-        cv2.imshow(WINDOW_NAME, annotated)
+        cv2.imshow(WINDOW_NAME, combined)
         if cv2.waitKey(1) & 0xFF == ord("q"):
             break
 
