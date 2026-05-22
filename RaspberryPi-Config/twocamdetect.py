@@ -6,8 +6,7 @@ import websocket
 from collections import deque
 from ultralytics import YOLO
 
-CAM_IP      = "192.168.50.18"
-WS_URL      = f"ws://{CAM_IP}:81/ws"
+CAM_IPS     = ["192.168.50.18", "192.168.50.11"]  # ESP32-CAM 1 and 2
 MODEL_PATH  = "/home/badboii/yolo11pfm1_320.onnx"  # ONNX is faster than .pt on Pi CPU
 CONFIDENCE  = 0.5
 WINDOW_NAME = "PFM-1 Detection"
@@ -18,12 +17,28 @@ lock = threading.Lock()
 
 def reader():
     """Continuously read JPEGs from WS into the single-slot buffer.
-    Older frames are dropped automatically because we only keep [-1]."""
+    Tries CAM_IPS[0] first; only tries CAM_IPS[1] if the first one fails.
+    Once connected to a cam, stays with it until the connection drops."""
+    active_ip = None
     while True:
         try:
-            ws = websocket.WebSocket()
-            ws.connect(WS_URL, timeout=5)
-            print(f"Connected to {WS_URL}")
+            if active_ip is None:
+                if len(CAM_IPS) > 0:
+                    try:
+                        ws = websocket.WebSocket()
+                        ws.connect(f"ws://{CAM_IPS[0]}:81/ws", timeout=5)
+                        active_ip = CAM_IPS[0]
+                    except Exception:
+                        print(f"Could not connect to {CAM_IPS[0]}, trying {CAM_IPS[1]}")
+                        ws = websocket.WebSocket()
+                        ws.connect(f"ws://{CAM_IPS[1]}:81/ws", timeout=5)
+                        active_ip = CAM_IPS[1]
+                print(f"Connected to ws://{active_ip}:81/ws")
+            else:
+                ws = websocket.WebSocket()
+                ws.connect(f"ws://{active_ip}:81/ws", timeout=5)
+                print(f"Reconnected to ws://{active_ip}:81/ws")
+
             while True:
                 data = ws.recv()
                 if not data or isinstance(data, str):
@@ -32,6 +47,7 @@ def reader():
                     latest_frame[0] = data
         except Exception as e:
             print(f"WS error: {e} — reconnecting in 2s")
+            active_ip = None
             time.sleep(2)
 
 
