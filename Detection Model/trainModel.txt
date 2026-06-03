@@ -1,7 +1,7 @@
 !pip install ultralytics roboflow
 
 from roboflow import Roboflow
-rf      = Roboflow(api_key="peptSrYEo5TeZsh29adp")  # same key you used on the Pi
+rf      = Roboflow(api_key="YOUR_API_KEY")  # paste your own Roboflow API key here
 project = rf.workspace("joakim-broager").project("yolo8-detection-pfm-1-8jr3w")
 dataset = project.version(1).download("yolov8")
 print("Dataset at:", dataset.location)
