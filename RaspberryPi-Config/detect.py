@@ -5,7 +5,7 @@ import threading
 import websocket
 from collections import deque
 from ultralytics import YOLO
-# you can use 160 320 or 620 for the image size
+# you can use 160 320 or 640 for the image size
 modelVersion = "yolov11"
 image_size = 320
 CAM_IP      = "192.168.50.18"

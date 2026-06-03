@@ -34,15 +34,15 @@ void setup() {
   config.pin_pwdn = PWDN_GPIO_NUM;
   config.pin_reset = RESET_GPIO_NUM;
   config.xclk_freq_hz = 20000000;
-  config.frame_size = FRAMESIZE_UXGA;
+  config.frame_size = FRAMESIZE_VGA;  // Allocate VGA-sized buffers; sensor is set to VGA below anyway
   config.pixel_format = PIXFORMAT_JPEG;
   config.grab_mode = CAMERA_GRAB_WHEN_EMPTY;
   config.fb_location = CAMERA_FB_IN_PSRAM;
-  config.jpeg_quality = 12;
+  config.jpeg_quality = 20;           // 0-63: higher = lower quality; 20 is plenty for 320px detection
   config.fb_count = 1;
 
   if (psramFound()) {
-    config.jpeg_quality = 10;
+    config.jpeg_quality = 20;          // Keep consistent with default; PSRAM gives us fb_count=2
     config.fb_count = 2;
     config.grab_mode = CAMERA_GRAB_LATEST;
   } else {
