@@ -524,30 +524,6 @@ X-GNOME-Autostart-enabled=true
 
 Reboot — the detector window opens automatically once the desktop loads.
 
----
-
-## Troubleshooting
-
-| Symptom | Fix |
-|---|---|
-| `OSError: [Errno 28] No space left on device` during pip install | `/tmp` is a 1.9 GB tmpfs. Use `TMPDIR=~/pip-tmp pip install --no-cache-dir ...` |
-| `Package 'libatlas-base-dev' has no installation candidate` | Trixie dropped it; remove from the apt command, OpenBLAS covers it |
-| Firmware won't compile: `WebSocket support not enabled` | ESP32 board package <3.0. Update via Boards Manager |
-| `curl /status` lacks `"ws_connected"` | Old MJPEG firmware on board — re-flash |
-| ESP32-CAM IP isn't `.10` | DHCP picks anywhere in your range. Use whatever Serial Monitor prints. |
-| `Illegal instruction` when YOLO runs | PyTorch 2.7+ uses ARMv8.2-A on Pi 4's A72. Pin `torch==2.6.0` |
-| `cv2.namedWindow: function is not implemented` | `opencv-python-headless` got installed. `pip uninstall opencv-python opencv-python-headless -y && TMPDIR=~/pip-tmp pip install --no-cache-dir opencv-python` |
-| `qt.qpa.xcb: could not connect to display` over SSH | `export DISPLAY=:0`, or run from a terminal in the Pi's desktop |
-| `ModuleNotFoundError: No module named 'torch'` | Install was skipped/failed. `TMPDIR=~/pip-tmp pip install --no-cache-dir "torch==2.6.0" "torchvision==0.21.0"` |
-| `scp: Connection timed out` | Laptop and Pi are on different subnets. Use eth0's IP if your laptop is on home WiFi |
-| `scp: stat local "~/Downloads/..."` on Windows `cmd` | `cmd` doesn't expand `~`. `cd %USERPROFILE%\Downloads` first, use the bare filename |
-| Roboflow won't let you download trained weights | Free-tier paywall. Use Colab (section 9) |
-| eth0 IP is `192.168.4.X` | Your home router collides with badboyNet. Move badboyNet to `192.168.50.x` (sections 02–03) |
-| `Killed` during pip install | Out of RAM. Add 2 GB swap: `sudo dphys-swapfile swapoff && sudo sed -i 's/^CONF_SWAPSIZE=.*/CONF_SWAPSIZE=2048/' /etc/dphys-swapfile && sudo dphys-swapfile setup && sudo dphys-swapfile swapon` |
-| Stream is laggy / `corrupt JPEG data` | Lower framesize/quality (section 11). The reader thread in `detect.py` already drops stale frames. |
-
----
-
 ## System architecture
 
 ```
