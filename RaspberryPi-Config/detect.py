@@ -33,7 +33,7 @@ def reader():
                 with lock:
                     latest_frame[0] = data
         except Exception as e:
-            print(f"WS error: {e} â€” reconnecting in 2s")
+            print(f"WS error: {e} ” reconnecting in 2s")
             time.sleep(2)
 
 
