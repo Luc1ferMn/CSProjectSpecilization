@@ -7,7 +7,6 @@ const char *ssid = "badboyNet";
 const char *password = "Badboy12345";
 
 void startCameraServer();
-void setupLedFlash();
 
 void setup() {
   Serial.begin(115200);
@@ -59,10 +58,6 @@ void setup() {
   sensor_t *s = esp_camera_sensor_get();
   // Drop to VGA at startup for faster initial frame rate; Pi can request higher via /control
   s->set_framesize(s, FRAMESIZE_VGA);
-
-#if defined(LED_GPIO_NUM)
-  setupLedFlash();
-#endif
 
   WiFi.begin(ssid, password);
   WiFi.setSleep(false);
